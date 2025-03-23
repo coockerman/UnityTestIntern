@@ -16,17 +16,22 @@ public class BoardTemp
 
     private GameManager gameManager;
 
-    public BoardTemp(Transform transform, GameManager gameManager)
+    private Board board;
+
+    public BoardTemp(Transform transform, GameManager gameManager, Board board)
     {
         m_root = transform;
 
         this.gameManager = gameManager;
+
+        this.board = board;
 
         this.boardSizeX = 5;
 
         m_cells = new Cell[boardSizeX];
 
         CreateBoard();
+        this.board = board;
     }
     private void CreateBoard()
     {
@@ -62,57 +67,61 @@ public class BoardTemp
                 break;
             }
         }
+
         CheckThirdCell();
+
         CheckEndGame();
 
+        CheckWinGame();
     }
     
     void CheckThirdCell()
     {
         Dictionary<string, List<int>> itemGroups = new Dictionary<string, List<int>>();
         Debug.Log("Check Third cell");
-        // Bước 1: Nhóm các Cell theo loại Item
         for (int i = 0; i < m_cells.Length; i++)
         {
             if (m_cells[i] == null || m_cells[i].IsEmpty) continue;
             Debug.Log("m_cell no empty");
             string item = m_cells[i].Item.PrefabName;
 
-            // Nếu chưa có nhóm cho loại Item này, tạo mới
             if (!itemGroups.ContainsKey(item))
             {
                 Debug.Log("Chua co nhom nen tao moi");
                 itemGroups[item] = new List<int>();
             }
 
-            // Lưu index của ô vào danh sách
             itemGroups[item].Add(i);
         }
 
-        // Bước 2: Tìm nhóm có ít nhất 3 ô và xóa chúng
         foreach (var group in itemGroups)
         {
             if (group.Value.Count >= 3)
             {
-                // Xóa 3 ô đầu tiên trong nhóm
                 for (int i = 0; i < 3; i++)
                 {
                     int index = group.Value[i];
-                    m_cells[index].ExplodeItem(); // Kích hoạt hiệu ứng nổ
-                    m_cells[index].Free(); // Đánh dấu là ô trống
+                    m_cells[index].ExplodeItem();
+                    m_cells[index].Free();
                 }
-                break; // Chỉ xóa một nhóm trong một lần gọi
+                break;
             }
         }
     }
     void CheckEndGame()
     {
-        // Kiểm tra xem còn ô trống nào không
         bool hasEmptyCell = m_cells.Any(cell => cell.IsEmpty);
         if (!hasEmptyCell)
         {
             gameManager.SetState(GameManager.eStateGame.GAME_OVER);
             Debug.Log("End Game");
         }
+    }
+    void CheckWinGame()
+    {
+        if (board == null) return;
+
+        if (board.CheckWinGame())
+            gameManager.SetState(GameManager.eStateGame.GAME_WIN);
     }
 }

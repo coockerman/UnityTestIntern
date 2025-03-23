@@ -31,6 +31,7 @@ public class Board
 
         m_matchMin = gameSettings.MatchesMin;
 
+
         this.boardSizeX = gameSettings.BoardSizeX;
         this.boardSizeY = gameSettings.BoardSizeY;
 
@@ -130,9 +131,21 @@ public class Board
     }
 
 
-
-
-
+    public bool CheckWinGame()
+    {
+        for (int x = 0; x < boardSizeX; x++)
+        {
+            for(int y = 0; y < boardSizeY; y++)
+            {
+                Cell cell = m_cells[x, y];
+                if (cell.Item != null)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
     internal void Shuffle()
     {

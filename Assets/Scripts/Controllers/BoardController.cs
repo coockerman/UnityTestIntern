@@ -45,7 +45,7 @@ public class BoardController : MonoBehaviour
 
         m_board = new Board(this.transform, gameSettings);
 
-        m_boardTemp = new BoardTemp(tranBoardTemp, gameManager);
+        m_boardTemp = new BoardTemp(tranBoardTemp, gameManager, m_board);
 
         Fill();
     }
@@ -65,6 +65,10 @@ public class BoardController : MonoBehaviour
                 break;
             case GameManager.eStateGame.PAUSE:
                 IsBusy = true;
+                break;
+            case GameManager.eStateGame.GAME_WIN:
+                m_gameOver = true;
+                StopHints();
                 break;
             case GameManager.eStateGame.GAME_OVER:
                 m_gameOver = true;
