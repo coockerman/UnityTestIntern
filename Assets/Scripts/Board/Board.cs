@@ -138,7 +138,7 @@ public class Board
             for(int y = 0; y < boardSizeY; y++)
             {
                 Cell cell = m_cells[x, y];
-                if (cell.Item != null)
+                if (!cell.IsEmpty)
                 {
                     return false;
                 }
