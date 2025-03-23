@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
         MAIN_MENU,
         GAME_STARTED,
         PAUSE,
+        GAME_WIN,
         GAME_OVER,
     }
 
