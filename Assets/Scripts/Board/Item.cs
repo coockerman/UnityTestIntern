@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,10 +11,11 @@ public class Item
 
     public Transform View { get; private set; }
 
-
+    private string prefabname;
+    public string PrefabName { get { return prefabname; } }
     public virtual void SetView()
     {
-        string prefabname = GetPrefabName();
+        prefabname = GetPrefabName();
 
         if (!string.IsNullOrEmpty(prefabname))
         {

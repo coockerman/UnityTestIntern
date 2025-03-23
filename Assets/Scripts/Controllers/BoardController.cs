@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,6 +12,8 @@ public class BoardController : MonoBehaviour
     public bool IsBusy { get; private set; }
 
     private Board m_board;
+
+    private BoardTemp m_boardTemp;
 
     private GameManager m_gameManager;
 
@@ -31,7 +33,7 @@ public class BoardController : MonoBehaviour
 
     private bool m_gameOver;
 
-    public void StartGame(GameManager gameManager, GameSettings gameSettings)
+    public void StartGame(GameManager gameManager, Transform tranBoardTemp ,GameSettings gameSettings)
     {
         m_gameManager = gameManager;
 
@@ -42,6 +44,8 @@ public class BoardController : MonoBehaviour
         m_cam = Camera.main;
 
         m_board = new Board(this.transform, gameSettings);
+
+        m_boardTemp = new BoardTemp(tranBoardTemp, gameManager);
 
         Fill();
     }
@@ -75,15 +79,15 @@ public class BoardController : MonoBehaviour
         if (m_gameOver) return;
         if (IsBusy) return;
 
-        if (!m_hintIsShown)
-        {
-            m_timeAfterFill += Time.deltaTime;
-            if (m_timeAfterFill > m_gameSettings.TimeForHint)
-            {
-                m_timeAfterFill = 0f;
-                ShowHint();
-            }
-        }
+        //if (!m_hintIsShown)
+        //{
+        //    m_timeAfterFill += Time.deltaTime;
+        //    if (m_timeAfterFill > m_gameSettings.TimeForHint)
+        //    {
+        //        m_timeAfterFill = 0f;
+        //        ShowHint();
+        //    }
+        //}
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -92,6 +96,10 @@ public class BoardController : MonoBehaviour
             {
                 m_isDragging = true;
                 m_hitCollider = hit.collider;
+                Cell c1 = m_hitCollider.GetComponent<Cell>();
+                if(c1.Item != null)
+                    m_boardTemp.AddCell(c1);
+
             }
         }
 
@@ -100,35 +108,35 @@ public class BoardController : MonoBehaviour
             ResetRayCast();
         }
 
-        if (Input.GetMouseButton(0) && m_isDragging)
-        {
-            var hit = Physics2D.Raycast(m_cam.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-            if (hit.collider != null)
-            {
-                if (m_hitCollider != null && m_hitCollider != hit.collider)
-                {
-                    StopHints();
+        //if (Input.GetMouseButton(0) && m_isDragging)
+        //{
+        //    var hit = Physics2D.Raycast(m_cam.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+        //    if (hit.collider != null)
+        //    {
+        //        if (m_hitCollider != null && m_hitCollider != hit.collider)
+        //        {
+        //            StopHints();
 
-                    Cell c1 = m_hitCollider.GetComponent<Cell>();
-                    Cell c2 = hit.collider.GetComponent<Cell>();
-                    if (AreItemsNeighbor(c1, c2))
-                    {
-                        IsBusy = true;
-                        SetSortingLayer(c1, c2);
-                        m_board.Swap(c1, c2, () =>
-                        {
-                            FindMatchesAndCollapse(c1, c2);
-                        });
+        //            Cell c1 = m_hitCollider.GetComponent<Cell>();
+        //            Cell c2 = hit.collider.GetComponent<Cell>();
+        //            if (AreItemsNeighbor(c1, c2))
+        //            {
+        //                IsBusy = true;
+        //                SetSortingLayer(c1, c2);
+        //                m_board.Swap(c1, c2, () =>
+        //                {
+        //                    FindMatchesAndCollapse(c1, c2);
+        //                });
 
-                        ResetRayCast();
-                    }
-                }
-            }
-            else
-            {
-                ResetRayCast();
-            }
-        }
+        //                ResetRayCast();
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        ResetRayCast();
+        //    }
+        //}
     }
 
     private void ResetRayCast()
@@ -177,6 +185,7 @@ public class BoardController : MonoBehaviour
 
     private void FindMatchesAndCollapse()
     {
+        return;
         List<Cell> matches = m_board.FindFirstMatch();
 
         if (matches.Count > 0)
@@ -296,8 +305,10 @@ public class BoardController : MonoBehaviour
     private void StopHints()
     {
         m_hintIsShown = false;
+        if(m_potentialMatch == null) return;
         foreach (var cell in m_potentialMatch)
         {
+            if(cell != null)
             cell.StopHintAnimation();
         }
 
