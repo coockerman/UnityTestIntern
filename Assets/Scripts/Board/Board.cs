@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -74,6 +74,43 @@ public class Board
 
     internal void Fill()
     {
+
+        int totalCells = boardSizeX * boardSizeY;
+        if(totalCells%3 != 0)
+        {
+            return;
+        }
+        int numberOfTypes = Enum.GetValues(typeof(NormalItem.eNormalType)).Length;
+
+        List<NormalItem.eNormalType> allTypes = new List<NormalItem.eNormalType>(Enum.GetValues(typeof(NormalItem.eNormalType)) as NormalItem.eNormalType[]);
+        List<NormalItem.eNormalType> usedTypes = allTypes.OrderBy(x => UnityEngine.Random.value).Take(Mathf.Min(5, numberOfTypes)).ToList();
+
+        List<NormalItem.eNormalType> itemPool = new List<NormalItem.eNormalType>();
+
+        int baseCountPerType = (totalCells / usedTypes.Count / 3) * 3;
+        int remainingCells = totalCells - (baseCountPerType * usedTypes.Count);
+
+        foreach (var type in usedTypes)
+        {
+            for (int i = 0; i < baseCountPerType; i++)
+            {
+                itemPool.Add(type);
+            }
+        }
+
+        while (remainingCells >= 3)
+        {
+            NormalItem.eNormalType randomType = usedTypes[UnityEngine.Random.Range(0, usedTypes.Count)];
+            for (int i = 0; i < 3; i++)
+            {
+                itemPool.Add(randomType);
+            }
+            remainingCells -= 3;
+        }
+
+        itemPool = itemPool.OrderBy(x => UnityEngine.Random.value).ToList();
+
+        int index = 0;
         for (int x = 0; x < boardSizeX; x++)
         {
             for (int y = 0; y < boardSizeY; y++)
@@ -81,34 +118,21 @@ public class Board
                 Cell cell = m_cells[x, y];
                 NormalItem item = new NormalItem();
 
-                List<NormalItem.eNormalType> types = new List<NormalItem.eNormalType>();
-                if (cell.NeighbourBottom != null)
-                {
-                    NormalItem nitem = cell.NeighbourBottom.Item as NormalItem;
-                    if (nitem != null)
-                    {
-                        types.Add(nitem.ItemType);
-                    }
-                }
+                item.SetType(itemPool[index]);
+                index++;
 
-                if (cell.NeighbourLeft != null)
-                {
-                    NormalItem nitem = cell.NeighbourLeft.Item as NormalItem;
-                    if (nitem != null)
-                    {
-                        types.Add(nitem.ItemType);
-                    }
-                }
-
-                item.SetType(Utils.GetRandomNormalTypeExcept(types.ToArray()));
                 item.SetView();
                 item.SetViewRoot(m_root);
-
                 cell.Assign(item);
                 cell.ApplyItemPosition(false);
             }
         }
     }
+
+
+
+
+
 
     internal void Shuffle()
     {
